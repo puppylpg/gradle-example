@@ -26,7 +26,11 @@ gradle相关的文件有很多：
   - `build.gradle`：**每个子项目都有一个**，定义gradle task；
   - `gradle.properties`：可有可无，进一步定义gradle的行为。比如要不要verbose输出、是否开启缓存；
 
-本工程的主体是父子项目，其中root项目由app、utilities、list三个子项目组成。除此之外，还有一个root项目[buildSrc](https://docs.gradle.org/current/samples/sample_convention_plugins.html)。
+本工程的主体是父子项目，其中root项目由app、utilities、list三个子项目组成。除此之外，**还有一个root项目[buildSrc](https://docs.gradle.org/current/samples/sample_convention_plugins.html)，用于定义一些插件，约束其他项目的构建行为**。
+
+### [buildSrc](buildSrc/README.md)
+单一项目。所以`settings.gradle`和`build.gradle`都定义在它下面。
+它存在的意义是[共享子项目之间的构建逻辑](https://docs.gradle.org/current/samples/sample_convention_plugins.html)。详情参考[buildSrc/README.md](buildSrc/README.md)。
 
 ### 父子项目
 父子项目，子项目由root下的`settings.gradle`定义：
@@ -34,23 +38,25 @@ gradle相关的文件有很多：
 include("app", "list", "utilities")
 ```
 
-### buildSrc
-单一项目。所以`settings.gradle`和`build.gradle`都定义在它下面。
-它存在的意义是[共享子项目之间的构建逻辑](https://docs.gradle.org/current/samples/sample_convention_plugins.html)。详情参考[`buildSrc/README.md`](buildSrc/README.md)。
+具体参考[app/README.md](app/README.md)
 
 ## task
-task是gradle最基本的构建逻辑。
+task是gradle最基本的构建逻辑，**相当于maven的plugin的一个goal**。maven的plugin是goal的集合，而gradle的plugin就是task的集合。
 
 比如列出所有的task：
-```
+```bash
 ./gradlew tasks
 ```
-或者针对子项目app执行task任务：
-```
+或者针对子项目`app`执行task任务：
+```bash
 ./gradlew :app:tasks
 ```
-task也有参数：
+或者执行`app`下的`welcome`自定义任务：
+```bash
+./gradlew :app:welcome
 ```
+task也有参数：
+```bash
 ./gradlew tasks --all
 ```
 

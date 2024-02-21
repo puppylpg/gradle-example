@@ -1,17 +1,27 @@
 便于[共享子项目之间的构建逻辑](https://docs.gradle.org/current/samples/sample_convention_plugins.html)。
 
 # DSL
-本工程使用kotlin构建了三种脚本（DSL）：
-- common：公共构建逻辑；
-- application：app的构建逻辑；
-- library：库的构建逻辑；
+本工程使用kotlin构建了三种脚本（DSL），或者说三个插件，**用以定义项目构建时候的约束条件**：
+- [xyz.puppylpg.java-common-conventions.gradle.kts](src/main/kotlin/xyz.puppylpg.java-common-conventions.gradle.kts)：公共构建逻辑；
+- [xyz.puppylpg.java-application-conventions.gradle.kts](src/main/kotlin/xyz.puppylpg.java-application-conventions.gradle.kts)：app的构建逻辑，依赖公共构建逻辑；
+- [xyz.puppylpg.java-library-conventions.gradle.kts](src/main/kotlin/xyz.puppylpg.java-library-conventions.gradle.kts)：库的构建逻辑，依赖公共构建逻辑；
 
-## common
-定义了依赖仓库、依赖、插件和一些插件的详细执行逻辑。
+## java-common-conventions
+定义了所需要的：
+- dependency:
+    - commons-text
+    - jupiter
+- dependency repo
+    - maven central
+- plugin和一些插件的详细执行逻辑。插件分为gradle的internal和external插件
+  - `java`：gradle的[java plugin](https://docs.gradle.org/current/userguide/java_plugin.html)
+  - `idea`：gradle的[idea plugin](https://docs.gradle.org/current/userguide/idea_plugin.html)，适配IDE
+  - `checkstyle`：要编译的代码必须满足`checkstyle.xml`
+  - `id("com.github.spotbugs")`：external插件。
 
-比如**checkstyle**、idea、**readme文件check**。
+最后还新加了`test`任务和`check`任务（强制要求**必须存在README.md**，且满足一定格式）。
 
-## library
+## java-library-conventions
 引用了common：
 ```kotlin
 plugins {
@@ -21,13 +31,18 @@ plugins {
     // ...
 }
 ```
-新加入了java-library插件和maven-publish插件，后者用于发包，相当于maven的install和publish。
+除此之外，还新加入了两个插件：
+- `java-library`
+- `maven-publish`：用于发包，相当于maven的install和publish。
 
-## app
-同理，引用了common，新加入了application插件。
+## java-application-conventions
+同理，引用了common，除此之外，还新加入了：
+- `application`插件
 
-## 使用
-最后，在其他子项目里，比如app子项目，`build.gradle`引用了上述app相关的脚本：
+# 使用
+**定义插件主要是为了使用**。三个插件其中一个是共有逻辑，另外两个是分别用于发包和不发包的两类项目的。
+
+在其他子项目里，比如app子项目，`build.gradle`引用了上述`java-application-conventions`插件：
 ```kotlin
 plugins {
     id("xyz.puppylpg.java-application-conventions")
@@ -35,7 +50,7 @@ plugins {
 ```
 
 # convention plugins
-上述的脚本不是插件，却可以像插件一样被引用，主要都是靠`kotlin-dsl`插件（如果是gradle写的，需要用`groovy-gradle-plugin`插件），把dsl变成了[precompiled script plugins](https://docs.gradle.org/current/userguide/custom_plugins.html#sec:precompiled_plugins)：
+上述的脚本不是插件，却可以像插件一样被引用，主要都是靠`kotlin-dsl`插件（如果是gradle写的，需要用`groovy-gradle-plugin`插件），把dsl变成了[precompiled script plugins](https://docs.gradle.org/current/userguide/custom_plugins.html#sec:precompiled_plugins)。所以本项目需要在`build.gradle.kts`里引入该插件：
 ```kotlin
 plugins {
     `kotlin-dsl`
